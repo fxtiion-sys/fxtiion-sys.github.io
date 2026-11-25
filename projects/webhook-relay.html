@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>webhook-relay · Ellie Kim</title>
+  <meta name="description" content="Case study: a reliable webhook delivery service built with Java 21, Spring Boot and PostgreSQL.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main">
+      <a class="logo" href="../index.html">ellie.kim</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#log">All projects</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="case">
+    <a class="hand back-link" href="../index.html#log">← back to the project log</a>
+
+    <header class="case-head">
+      <h1>webhook-relay</h1>
+      <p class="case-tagline">A reliable webhook delivery service: at-least-once delivery, retries, dead-letter replay and signed requests.</p>
+    </header>
+
+    <dl class="index-card">
+      <div><dt>Status</dt><dd><span class="badge badge-wip">In progress · v0.3</span></dd></div>
+      <div><dt>Period</dt><dd>Oct 2026 — Present</dd></div>
+      <div><dt>Role</dt><dd>Solo project</dd></div>
+      <div><dt>Releases</dt><dd>v0.1 · v0.2 · v0.3 (Nov 2026)</dd></div>
+      <div class="wide"><dt>Stack</dt><dd>Java 21 · Spring Boot · Spring Data JPA · PostgreSQL 17 · Flyway · Docker Compose · Micrometer · Prometheus · k6 · JUnit 5 · Testcontainers · WireMock · GitHub Actions</dd></div>
+      <div class="wide"><dt>Links</dt><dd><a href="https://github.com/fxtiion-sys/webhook-relay" target="_blank" rel="noopener">github.com/fxtiion-sys/webhook-relay ↗</a></dd></div>
+    </dl>
+
+    <section class="case-section" aria-labelledby="what">
+      <h2 id="what" class="hand-h">What</h2>
+      <p>Webhook Relay accepts events, creates a delivery job for every HTTP endpoint subscribed to that event type, and delivers them asynchronously through a database-backed worker. Failed deliveries are retried with capped exponential backoff and full jitter. Deliveries that run out of attempts, or fail for a non-retryable reason, move to <code>DEAD</code> and can be replayed by hand. Requests are signed with HMAC-SHA256, each endpoint has its own token-bucket rate limit, and delivery outcomes and latencies are exported to Prometheus.</p>
+    </section>
+
+    <section class="case-section" aria-labelledby="how">
+      <h2 id="how" class="hand-h">How it fits together</h2>
+      <div class="flow" role="img" aria-label="Producer sends POST /events to the Spring Boot API, which stores the event and its delivery jobs in PostgreSQL in one transaction. Workers claim jobs with FOR UPDATE SKIP LOCKED and send signed HTTP POST requests to the receiver.">
+        <div class="node"><b>Producer</b><span>POST /events</span></div>
+        <div class="arrow" aria-hidden="true"><span>JSON event</span></div>
+        <div class="node"><b>Spring Boot API</b><span>validate · idempotency key</span></div>
+        <div class="arrow" aria-hidden="true"><span>one transaction</span></div>
+        <div class="node node-accent"><b>PostgreSQL</b><span>events + delivery jobs<br>(store <em>and</em> queue)</span></div>
+        <div class="arrow" aria-hidden="true"><span>SKIP LOCKED</span></div>
+        <div class="node"><b>Workers</b><span>lease · backoff · rate limit</span></div>
+        <div class="arrow" aria-hidden="true"><span>signed POST</span></div>
+        <div class="node"><b>Receiver</b><span>subscribed endpoint</span></div>
+      </div>
+      <ul class="flow-notes">
+        <li><span class="hand">retry ↺</span> a retryable failure goes back to <code>PENDING</code> with the next attempt time pushed out</li>
+        <li><span class="hand">dead ✕</span> exhausted or non-retryable → <code>DEAD</code> → <code>POST /deliveries/{id}/replay</code></li>
+        <li><span class="hand">metrics ⟶</span> Prometheus scrapes <code>/actuator/prometheus</code></li>
+      </ul>
+    </section>
+
+    <section class="case-section" aria-labelledby="why">
+      <h2 id="why" class="hand-h">Why I designed it this way</h2>
+      <ul class="why-list">
+        <li><strong>PostgreSQL as both store and queue.</strong> Writing the event and its delivery jobs in one transaction means an accepted event can never be missing its jobs, and there's no separate broker to run. The cost is polling overhead and extra database load.</li>
+        <li><strong>Safe concurrent workers.</strong> Workers claim jobs with <code>SELECT … FOR UPDATE SKIP LOCKED</code>, so two workers never take the same row. Each claim has a lease: if a worker dies, the lease expires and another worker reclaims the job. Fencing checks reject results from a worker that no longer owns the job.</li>
+        <li><strong>At-least-once, stated honestly.</strong> A receiver can process a webhook before the worker records success. If the worker crashes in that window, the delivery is retried, so receivers should be idempotent.</li>
+        <li><strong>Flyway owns the schema.</strong> Applied migrations are never edited, and Hibernate runs with <code>ddl-auto=validate</code>, so the schema history stays reproducible.</li>
+        <li><strong>The database enforces the rules.</strong> CHECK constraints restrict statuses, one delivery per <code>(event, endpoint)</code>, and a lease timestamp only while <code>IN_PROGRESS</code>. Partial indexes keep finished history out of the active-job indexes.</li>
+        <li><strong>Sign the bytes that are sent.</strong> <code>jsonb</code> doesn't keep the original bytes, so the sender signs the exact body it transmits. The signature includes a timestamp checked against a ±5-minute window with a constant-time comparison.</li>
+      </ul>
+    </section>
+
+    <section class="case-section" aria-labelledby="results">
+      <h2 id="results" class="hand-h">Results I verified</h2>
+      <div class="stat-row">
+        <div class="stat"><b>2,564 / 2,564</b><span>deliveries succeeded across 4 local k6 runs</span></div>
+        <div class="stat"><b>16.0 s → 0.53 s</b><span>p95 end-to-end latency, 1 worker → 2 workers (−96.7%)</span></div>
+        <div class="stat"><b>10 / 10</b><span>events delivered after a receiver outage, none missing</span></div>
+        <div class="stat"><b>130 / 130</b><span>automated tests passing</span></div>
+      </div>
+      <ul class="why-list">
+        <li>The latency benchmark ran at 20 events per second for 60 seconds (1,201 events) against the same PostgreSQL queue. The two workers split the load 623 / 578.</li>
+        <li>For crash recovery, I killed a JVM worker with <code>SIGKILL</code> mid-delivery. A second worker reclaimed it only after the lease expired, and the attempt history stayed consistent. The receiver saw the duplicate request, which is the expected at-least-once behaviour.</li>
+      </ul>
+      <p class="fineprint">These are controlled local experiments with a mock receiver. They don't establish production throughput, availability or exactly-once delivery.</p>
+    </section>
+
+    <section class="case-section" aria-labelledby="next">
+      <h2 id="next" class="hand-h">What's next</h2>
+      <p>A server-rendered delivery history UI (Thymeleaf) is in development. Grafana dashboards, alerting rules and a public HTTPS deployment are planned.</p>
+    </section>
+
+    <section class="case-section" aria-labelledby="learned">
+      <h2 id="learned" class="hand-h">What I learned</h2>
+      <ul class="why-list">
+        <li><strong>"Reliable" needs a precise definition.</strong> At-least-once delivery means duplicates can happen. I learned to state the guarantee plainly and make receivers idempotent, instead of implying exactly-once.</li>
+        <li><strong>Concurrency can be handled in the database.</strong> Row locking with <code>SKIP LOCKED</code>, leases and fencing checks, backed by CHECK constraints, kept multiple workers correct without a separate coordination service.</li>
+        <li><strong>Measure before guessing where the bottleneck is.</strong> In the k6 runs, API p95 stayed around 17 ms while end-to-end latency was 16 s. That pointed at delivery throughput, not the API, and adding one worker cut end-to-end p95 by 96.7% with no code change.</li>
+        <li><strong>Fault injection shows what tests alone don't.</strong> Killing a real worker with <code>SIGKILL</code> confirmed lease recovery end to end, and let me see the duplicate delivery my design predicted.</li>
+      </ul>
+    </section>
+
+    <nav class="case-nav" aria-label="More projects">
+      <a href="campus-carpool.html">← campus-carpool</a>
+      <a href="etf-analytics.html">etf-analytics →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built with plain HTML, CSS and a little JavaScript · Hosted on GitHub Pages</p>
+  </footer>
+  <script src="../js/main.js" defer></script>
+</body>
+</html>

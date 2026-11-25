@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>etf-analytics · Ellie Kim</title>
+  <meta name="description" content="Case study: a daily ETF data pipeline in Python with SQLite, data validation, GitHub Actions and a FastAPI API.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main">
+      <a class="logo" href="../index.html">ellie.kim</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#log">All projects</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="case">
+    <a class="hand back-link" href="../index.html#log">← back to the project log</a>
+
+    <header class="case-head">
+      <h1>etf-analytics</h1>
+      <p class="case-tagline">A daily data pipeline that answers one question: for a Canadian investor, is buying VFV in CAD different from holding SPY?</p>
+    </header>
+
+    <dl class="index-card">
+      <div><dt>Status</dt><dd><span class="badge badge-done">Completed</span></dd></div>
+      <div><dt>Period</dt><dd>Nov 2026 — Nov 2026</dd></div>
+      <div><dt>Role</dt><dd>Solo project</dd></div>
+      <div><dt>Updates</dt><dd>Every weekday via GitHub Actions</dd></div>
+      <div class="wide"><dt>Stack</dt><dd>Python · pandas · SQLite · FastAPI · pytest · GitHub Actions · ruff · mypy</dd></div>
+      <div class="wide"><dt>Links</dt><dd><a href="https://github.com/fxtiion-sys/etf-analytics" target="_blank" rel="noopener">github.com/fxtiion-sys/etf-analytics ↗</a></dd></div>
+    </dl>
+
+    <section class="case-section" aria-labelledby="what">
+      <h2 id="what" class="hand-h">What</h2>
+      <p>A Python pipeline that downloads daily prices for five Canadian and US ETFs plus the Bank of Canada USD/CAD rate. It stores them in SQLite with incremental updates, validates the data, computes return and risk metrics, and builds a Markdown report with charts. A GitHub Actions workflow refreshes everything every weekday, and a read-only FastAPI service serves the results as JSON.</p>
+    </section>
+
+    <section class="case-section" aria-labelledby="how">
+      <h2 id="how" class="hand-h">How it fits together</h2>
+      <div class="flow" role="img" aria-label="Yahoo Finance and the Bank of Canada Valet API feed an incremental fetch step, which upserts into SQLite. A validation step checks the data before the report and the read-only FastAPI API use it. GitHub Actions runs the pipeline every weekday.">
+        <div class="node"><b>Sources</b><span>Yahoo Finance<br>Bank of Canada Valet API</span></div>
+        <div class="arrow" aria-hidden="true"><span>last 10 days</span></div>
+        <div class="node"><b>fetch</b><span>incremental · retries ×3</span></div>
+        <div class="arrow" aria-hidden="true"><span>upsert</span></div>
+        <div class="node node-accent"><b>SQLite</b><span>(date, symbol) primary key</span></div>
+        <div class="arrow" aria-hidden="true"><span>check first</span></div>
+        <div class="node"><b>validate</b><span>spikes · frozen · gaps · weekends</span></div>
+        <div class="arrow" aria-hidden="true"><span>then</span></div>
+        <div class="node"><b>report + API</b><span>charts · FastAPI (read-only)</span></div>
+      </div>
+      <ul class="flow-notes">
+        <li><span class="hand">schedule ⏱</span> GitHub Actions runs weekdays at 23:00 UTC, after both markets close and the Bank of Canada publishes</li>
+        <li><span class="hand">on failure ✕</span> nothing is committed, the cached database isn't replaced, and the workflow opens a GitHub issue</li>
+      </ul>
+    </section>
+
+    <section class="case-section" aria-labelledby="why">
+      <h2 id="why" class="hand-h">Why I designed it this way</h2>
+      <ul class="why-list">
+        <li><strong>Idempotent writes.</strong> Prices are upserted on a <code>(date, symbol)</code> primary key inside a transaction, with a <code>CHECK (value &gt; 0)</code> constraint. Re-running an update never duplicates rows, and a failed batch writes nothing.</li>
+        <li><strong>Detect rewritten history.</strong> Yahoo recalculates adjusted prices back through history when a fund pays a dividend. Each update compares the overlapping days with stored values, and if they differ by more than 0.01% it downloads the full history again instead of appending to differently scaled data.</li>
+        <li><strong>No fake data on holidays.</strong> The TSX and NYSE close on different holidays. I keep only days when both were open and the Bank of Canada published a rate. Forward-filling would create fake 0% days and distort volatility and correlation.</li>
+        <li><strong>Validate before analysing.</strong> The pipeline stops and lists every problem if it finds a spike, a frozen price, a long gap, a weekend row or a large Bank of Canada vs Yahoo FX gap. Thresholds sit just above the largest real values, so real market moves pass and data errors don't.</li>
+        <li><strong>One job per component.</strong> The API only reads the database. If it's empty, it returns <code>503</code> instead of starting a download, so fetching stays the job of <code>fetch</code>.</li>
+      </ul>
+    </section>
+
+    <section class="case-section" aria-labelledby="results">
+      <h2 id="results" class="hand-h">Results I verified</h2>
+      <div class="stat-row">
+        <div class="stat"><b>8.6% → 3.6%</b><span>daily tracking error after switching to the Bank of Canada's official FX rate</span></div>
+        <div class="stat"><b>1 real bug</b><span>caught by validation: a Saturday row in Yahoo's currency feed</span></div>
+        <div class="stat"><b>0 network calls</b><span>in the test suite: every metric is checked against hand-computable data</span></div>
+      </div>
+      <ul class="why-list">
+        <li>The tracking-error drop showed that most of the earlier gap between VFV and SPY was noise in the exchange rate, not a difference between the funds.</li>
+        <li>The weekend row was being counted as a day when both markets were closed. Weekend rows are now dropped when the data is loaded.</li>
+      </ul>
+    </section>
+
+    <section class="case-section" aria-labelledby="learned">
+      <h2 id="learned" class="hand-h">What I learned</h2>
+      <ul class="why-list">
+        <li><strong>External data isn't clean just because it comes from a big provider.</strong> A single Saturday row in Yahoo's currency feed was quietly being counted as a market holiday. Now I write the checks before the analysis, not after something looks wrong.</li>
+        <li><strong>The measurement can be the problem.</strong> I first read the gap between VFV and SPY as a difference between the funds. Changing only the exchange-rate source cut tracking error from 8.6% to 3.6%, so most of it was noise in how I measured.</li>
+        <li><strong>Idempotent writes are what make automation safe.</strong> Because every update is an upsert inside a transaction, a scheduled job can fail halfway and simply run again with no manual cleanup.</li>
+        <li><strong>Tests shouldn't depend on the network.</strong> Building tests on small, hand-computable price series and recorded API responses kept CI fast and deterministic.</li>
+      </ul>
+    </section>
+
+    <nav class="case-nav" aria-label="More projects">
+      <a href="webhook-relay.html">← webhook-relay</a>
+      <a href="campus-carpool.html">campus-carpool →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built with plain HTML, CSS and a little JavaScript · Hosted on GitHub Pages</p>
+  </footer>
+  <script src="../js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>campus-carpool · Ellie Kim</title>
+  <meta name="description" content="Case study: my part of a team ride-sharing app for verified Western students — the auth API, data models and frontend base.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main">
+      <a class="logo" href="../index.html">ellie.kim</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#log">All projects</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="case">
+    <a class="hand back-link" href="../index.html#log">← back to the project log</a>
+
+    <header class="case-head">
+      <h1>campus-carpool</h1>
+      <p class="case-tagline">A web app that lets verified Western students share rides to other cities.</p>
+    </header>
+
+    <dl class="index-card">
+      <div><dt>Status</dt><dd><span class="badge badge-wip">In progress (frontend complete)</span></dd></div>
+      <div><dt>Period</dt><dd>Nov 2026 — Present</dd></div>
+      <div><dt>Team</dt><dd>5 people · WiTS Ada Mentorship</dd></div>
+      <div><dt>My role</dt><dd>Developer</dd></div>
+      <div class="wide"><dt>Stack</dt><dd>Python · Flask · Flask-Login · SQLAlchemy · Flask-Migrate · PostgreSQL · React (Vite) · React Router</dd></div>
+      <div class="wide"><dt>Links</dt><dd><a href="https://github.com/sabrinajlee/campus-carpool" target="_blank" rel="noopener">github.com/sabrinajlee/campus-carpool ↗</a></dd></div>
+    </dl>
+
+    <section class="case-section" aria-labelledby="what">
+      <h2 id="what" class="hand-h">What I built</h2>
+      <p class="fineprint">This is a team project, so this page covers only my part, taken from my commits.</p>
+      <ul class="why-list">
+        <li><strong>Project skeleton.</strong> The Flask JSON API and React (Vite) frontend setup the rest of the team builds on.</li>
+        <li><strong>Data models.</strong> PostgreSQL models for users, rides and ride requests, the first migration, and an ERD kept in sync with the models.</li>
+        <li><strong>Auth API.</strong> Sign-up, email verification, resend, login, logout and <code>/me</code>, with session login through Flask-Login. Every error goes through one helper that returns an HTTP status plus a machine-readable code such as <code>EMAIL_TAKEN</code> or <code>INVALID_EMAIL_DOMAIN</code>.</li>
+        <li><strong>Frontend base.</strong> Routes, the bottom nav, design tokens and shared components, then the sign-up, check-email, login, Explore and Ride details pages, connected to the auth API with an auth context and protected routes.</li>
+      </ul>
+    </section>
+
+    <section class="case-section" aria-labelledby="how">
+      <h2 id="how" class="hand-h">How sign-up works</h2>
+      <div class="flow" role="img" aria-label="A student signs up with a school email. The API checks the domain and creates the user, then emails a signed, time-limited link. Opening the link verifies the account and redirects to the login page with the result. After that the student can log in.">
+        <div class="node"><b>Sign up</b><span>POST /api/auth/signup</span></div>
+        <div class="arrow" aria-hidden="true"><span>school domain?</span></div>
+        <div class="node"><b>Create user</b><span>unverified</span></div>
+        <div class="arrow" aria-hidden="true"><span>email</span></div>
+        <div class="node node-accent"><b>Signed link</b><span>time-limited token</span></div>
+        <div class="arrow" aria-hidden="true"><span>click</span></div>
+        <div class="node"><b>Verify</b><span>redirect → /login?verify=…</span></div>
+        <div class="arrow" aria-hidden="true"><span>then</span></div>
+        <div class="node"><b>Log in</b><span>verified only · session</span></div>
+      </div>
+      <ul class="flow-notes">
+        <li><span class="hand">rejected ✕</span> missing fields, a non-school email, a short password or an existing email each return their own error code</li>
+        <li><span class="hand">link result →</span> <code>success</code>, <code>expired</code> or <code>invalid</code>, shown on the login page</li>
+      </ul>
+    </section>
+
+    <section class="case-section" aria-labelledby="why">
+      <h2 id="why" class="hand-h">Why I designed it this way</h2>
+      <ul class="why-list">
+        <li><strong>School-email-only sign-up.</strong> The app is meant for verified students only, so sign-up checks the email domain, and login is refused with <code>403 EMAIL_NOT_VERIFIED</code> until the email link has been opened.</li>
+        <li><strong>No account enumeration.</strong> "Resend verification" gives the same answer whether or not the account exists, so nobody can use it to check which emails are registered.</li>
+        <li><strong>The verify link redirects instead of returning JSON.</strong> It's opened from an email in a browser, not called by the frontend, so it sends the student to the login page with the result in the URL.</li>
+        <li><strong>Signed tokens instead of a token table.</strong> The verification link carries the user ID signed with the app's secret key and a purpose-specific salt, and it expires after a set time. There's no extra table to store or clean up. The tradeoff is that a link can't be revoked early, only expire, which is acceptable here because opening a verify link twice does nothing harmful.</li>
+      </ul>
+    </section>
+
+    <section class="case-section" aria-labelledby="learned">
+      <h2 id="learned" class="hand-h">What I learned</h2>
+      <ul class="why-list">
+        <li><strong>On a team, the foundation is a deliverable.</strong> Setting up the skeleton, data models and shared components early meant teammates could build pages and features in parallel instead of waiting on setup.</li>
+        <li><strong>Docs only help if they match the code.</strong> I updated the ERD as soon as the models changed, so teammates could trust the docs instead of reading migrations.</li>
+        <li><strong>Auth details are security details.</strong> Choices like time-limited signed links and giving the same answer whether an account exists or not decide what an attacker can learn.</li>
+        <li><strong>Working through pull requests.</strong> Each piece of my work went into the shared repo as its own pull request (project setup, models, auth API, pages), which kept changes small and easy to trace.</li>
+      </ul>
+    </section>
+
+    <nav class="case-nav" aria-label="More projects">
+      <a href="etf-analytics.html">← etf-analytics</a>
+      <a href="webhook-relay.html">webhook-relay →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built with plain HTML, CSS and a little JavaScript · Hosted on GitHub Pages</p>
+  </footer>
+  <script src="../js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ellie Kim · Software Developer</title>
+  <meta name="description" content="Nahyun (Ellie) Kim — Computer Science student at Western University. Software developer (backend) with an interest in infrastructure.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="Ellie Kim · Software Developer">
+  <meta property="og:description" content="CS @ Western University. Software developer (backend) with an interest in infrastructure.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#log">Skip to projects</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Main">
+      <a class="logo" href="#top">ellie.kim</a>
+      <ul class="nav-links">
+        <li><a href="#building">Now</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#log">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- ============ HERO ============ -->
+    <section class="hero" aria-labelledby="hero-name">
+      <div class="hero-text">
+        <p class="hand hello">hi, I'm</p>
+        <h1 id="hero-name"><span class="highlight">Ellie Kim</span></h1>
+        <p class="hero-sub">Nahyun (Ellie) Kim · 3rd-year Computer Science @ Western University</p>
+        <p class="hero-lead">
+          <strong>Software developer</strong> focused on backend services and REST APIs, with a growing interest in <strong>infrastructure</strong>.
+          My projects focus on reliability: retries, data validation, integration tests and metrics.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#log">See my projects</a>
+          <a class="btn" href="https://github.com/fxtiion-sys" target="_blank" rel="noopener">GitHub</a>
+          <a class="btn" href="mailto:ellie.nkim.dev@gmail.com">Email me</a>
+        </div>
+      </div>
+
+      <div class="hero-art">
+        <canvas id="net" aria-hidden="true"></canvas>
+        <p class="hand hint hint-pointer" aria-hidden="true">← hover me, it's a tiny neural net</p>
+        <p class="hand hint hint-touch" aria-hidden="true">↑ tap me, it's a tiny neural net</p>
+        <aside class="sticky-note hand" aria-label="Current status">
+          currently:<br>3rd year CS<br>open to co-op<br>from May 2027!
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ CURRENTLY BUILDING (pinned) ============ -->
+    <section id="building" class="section" aria-labelledby="building-title">
+      <div class="section-head">
+        <h2 id="building-title">Currently building</h2>
+        <p class="hand section-note">pinned to the top of my notebook</p>
+      </div>
+
+      <div class="pinned-wrap">
+        <article class="pinned reveal" data-skills="Java,Spring Boot,Spring Data JPA,Thymeleaf,PostgreSQL,Flyway,SQL,REST APIs,Docker Compose,GitHub Actions,Prometheus,Micrometer,k6,JUnit 5,Testcontainers,WireMock,Mockito,Gradle,Git">
+          <span class="pin" aria-hidden="true"></span>
+          <div class="pinned-top">
+            <h3>webhook-relay</h3>
+            <span class="badge badge-wip">In progress · v0.3</span>
+          </div>
+          <p class="pinned-lead">A webhook delivery service in Java 21 and Spring Boot. PostgreSQL is both the event store and the work queue. Delivery is at-least-once, with retries, dead-letter replay and signed requests.</p>
+          <ul class="pinned-facts">
+            <li><strong>2,564 / 2,564</strong> deliveries succeeded across local k6 load tests</li>
+            <li><strong>−96.7%</strong> p95 end-to-end latency going from 1 worker to 2, with no code changes</li>
+            <li><strong>Crash recovery verified:</strong> a SIGKILLed worker's delivery was picked up by another worker after its lease expired</li>
+          </ul>
+          <p class="fineprint">Controlled local experiments with a mock receiver, not production guarantees.</p>
+          <div class="pinned-actions">
+            <a class="btn btn-primary" href="projects/webhook-relay.html">Read the case →</a>
+            <a class="btn" href="https://github.com/fxtiion-sys/webhook-relay" target="_blank" rel="noopener">Repo</a>
+          </div>
+        </article>
+
+        <aside class="tally reveal" aria-label="At a glance">
+          <p class="hand tally-title">at a glance</p>
+          <dl>
+            <div><dt>projects</dt><dd>3</dd></div>
+            <div><dt>completed</dt><dd>1</dd></div>
+            <div><dt>team project</dt><dd>1</dd></div>
+            <div><dt>tests passing<br><small>in webhook-relay</small></dt><dd>130</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ EDUCATION ============ -->
+    <section id="education" class="section" aria-labelledby="education-title">
+      <div class="section-head">
+        <h2 id="education-title">Education</h2>
+        <p class="hand section-note">3rd year · co-op from May 2027</p>
+      </div>
+
+      <article class="entry-card edu-card reveal">
+        <div class="edu-head">
+          <img class="edu-logo" src="assets/western-logo.png" alt="Western University logo" width="64" height="64" loading="lazy">
+          <div class="edu-title">
+            <div class="entry-top">
+              <h3>Western University</h3>
+              <p class="edu-date hand">2023 — Apr 2029</p>
+            </div>
+            <p class="entry-kind">BSc, Major in Computer Science · Expected Apr 2029</p>
+          </div>
+        </div>
+        <ul class="edu-list">
+          <li><strong>Science Internship Program:</strong> available for 4- to 16-month work terms starting May 2027</li>
+          <li><strong>Coursework:</strong> Databases · Software Engineering · Data Structures &amp; Algorithms · Software Tools &amp; Systems Programming · Computer Organization · Discrete Structures</li>
+          <li><strong>Award:</strong> Western Admission Scholarship</li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- ============ SKILLS (filter) ============ -->
+    <section id="skills" class="section" aria-labelledby="skills-title">
+      <div class="section-head">
+        <h2 id="skills-title">Skills</h2>
+        <p class="hand section-note">only things I've used — click one to see where ↓</p>
+      </div>
+
+      <div class="skills-grid" id="skill-filter">
+        <div class="skill-group">
+          <h3>Languages</h3>
+          <ul class="stickers">
+            <li><button type="button" data-skill="Java">Java</button></li>
+            <li><button type="button" data-skill="Python">Python</button></li>
+            <li><button type="button" data-skill="SQL">SQL</button></li>
+            <li><button type="button" data-skill="JavaScript">JavaScript</button></li>
+          </ul>
+        </div>
+        <div class="skill-group">
+          <h3>Backend</h3>
+          <ul class="stickers">
+            <li><button type="button" data-skill="Spring Boot">Spring Boot</button></li>
+            <li><button type="button" data-skill="Spring Data JPA">Spring Data JPA</button></li>
+            <li><button type="button" data-skill="FastAPI">FastAPI</button></li>
+            <li><button type="button" data-skill="Flask">Flask</button></li>
+            <li><button type="button" data-skill="REST APIs">REST APIs</button></li>
+            <li><button type="button" data-skill="Thymeleaf">Thymeleaf</button></li>
+          </ul>
+        </div>
+        <div class="skill-group">
+          <h3>Data</h3>
+          <ul class="stickers">
+            <li><button type="button" data-skill="PostgreSQL">PostgreSQL</button></li>
+            <li><button type="button" data-skill="SQLite">SQLite</button></li>
+            <li><button type="button" data-skill="Flyway">Flyway</button></li>
+            <li><button type="button" data-skill="SQLAlchemy">SQLAlchemy</button></li>
+            <li><button type="button" data-skill="pandas">pandas</button></li>
+          </ul>
+        </div>
+        <div class="skill-group">
+          <h3>Infra &amp; observability</h3>
+          <ul class="stickers">
+            <li><button type="button" data-skill="Docker Compose">Docker Compose</button></li>
+            <li><button type="button" data-skill="GitHub Actions">GitHub Actions</button></li>
+            <li><button type="button" data-skill="Prometheus">Prometheus</button></li>
+            <li><button type="button" data-skill="Micrometer">Micrometer</button></li>
+            <li><button type="button" data-skill="k6">k6</button></li>
+          </ul>
+        </div>
+        <div class="skill-group">
+          <h3>Testing &amp; quality</h3>
+          <ul class="stickers">
+            <li><button type="button" data-skill="JUnit 5">JUnit 5</button></li>
+            <li><button type="button" data-skill="Testcontainers">Testcontainers</button></li>
+            <li><button type="button" data-skill="WireMock">WireMock</button></li>
+            <li><button type="button" data-skill="Mockito">Mockito</button></li>
+            <li><button type="button" data-skill="pytest">pytest</button></li>
+            <li><button type="button" data-skill="ruff">ruff</button></li>
+            <li><button type="button" data-skill="mypy">mypy</button></li>
+          </ul>
+        </div>
+        <div class="skill-group">
+          <h3>Frontend &amp; tools</h3>
+          <ul class="stickers">
+            <li><button type="button" data-skill="React">React</button></li>
+            <li><button type="button" data-skill="Git">Git</button></li>
+            <li><button type="button" data-skill="Gradle">Gradle</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="filter-status" id="filter-status" aria-live="polite"></p>
+    </section>
+
+    <!-- ============ PROJECT LOG (timeline) ============ -->
+    <section id="log" class="section" aria-labelledby="log-title">
+      <div class="section-head">
+        <h2 id="log-title">Project log</h2>
+        <p class="hand section-note">newest entry first · dates from my GitHub history</p>
+      </div>
+
+      <ol class="log">
+        <li class="entry reveal" data-skills="Python,pandas,SQLite,SQL,FastAPI,REST APIs,pytest,ruff,mypy,GitHub Actions,Git">
+          <p class="entry-date hand">Nov 2026<br>— Nov 2026</p>
+          <div class="entry-card">
+            <div class="entry-top">
+              <h3><a href="projects/etf-analytics.html">etf-analytics</a></h3>
+              <span class="badge badge-done">Completed</span>
+            </div>
+            <p class="entry-kind">Personal project · Data pipeline</p>
+            <p>A daily data pipeline that answers one question: for a Canadian investor, is buying VFV in CAD different from holding SPY? It ingests prices and FX rates, validates the data, and serves the results through a read-only API.</p>
+            <ul class="tags" aria-label="Technologies">
+              <li>Python</li><li>pandas</li><li>SQLite</li><li>FastAPI</li><li>pytest</li><li>GitHub Actions</li>
+            </ul>
+            <div class="entry-links">
+              <a href="projects/etf-analytics.html">Read the case →</a>
+              <a href="https://github.com/fxtiion-sys/etf-analytics" target="_blank" rel="noopener">Repo ↗</a>
+            </div>
+          </div>
+        </li>
+
+        <li class="entry reveal" data-skills="Python,Flask,SQLAlchemy,PostgreSQL,REST APIs,JavaScript,React,Git">
+          <p class="entry-date hand">Nov 2026<br>— Present</p>
+          <div class="entry-card">
+            <div class="entry-top">
+              <h3><a href="projects/campus-carpool.html">campus-carpool</a></h3>
+              <span class="badge badge-team">Team project</span>
+            </div>
+            <p class="entry-kind">WiTS Ada Mentorship · Team of 5 · My role: Developer</p>
+            <p>A web app that lets verified Western students share rides to other cities. I built the auth API (school-email-only sign-up with signed verification links), the PostgreSQL models and the frontend base.</p>
+            <ul class="tags" aria-label="Technologies">
+              <li>Flask</li><li>SQLAlchemy</li><li>PostgreSQL</li><li>React</li>
+            </ul>
+            <div class="entry-links">
+              <a href="projects/campus-carpool.html">Read the case →</a>
+              <a href="https://github.com/sabrinajlee/campus-carpool" target="_blank" rel="noopener">Repo ↗</a>
+            </div>
+          </div>
+        </li>
+
+        <li class="entry reveal" data-skills="Java,Spring Boot,Spring Data JPA,Thymeleaf,PostgreSQL,Flyway,SQL,REST APIs,Docker Compose,GitHub Actions,Prometheus,Micrometer,k6,JUnit 5,Testcontainers,WireMock,Mockito,Gradle,Git">
+          <p class="entry-date hand">Oct 2026<br>— Present</p>
+          <div class="entry-card">
+            <div class="entry-top">
+              <h3><a href="projects/webhook-relay.html">webhook-relay</a></h3>
+              <span class="badge badge-wip">In progress</span>
+            </div>
+            <p class="entry-kind">Personal project · Backend service</p>
+            <p>A reliable webhook delivery service with at-least-once delivery, retries, dead-letter replay, HMAC signing, rate limiting and Prometheus metrics.</p>
+            <ol class="milestones" aria-label="Releases">
+              <li><span class="hand">v0.1</span> local MVP</li>
+              <li><span class="hand">v0.2</span> retries, replay, signing</li>
+              <li><span class="hand">v0.3</span> load and crash-recovery testing</li>
+            </ol>
+            <ul class="tags" aria-label="Technologies">
+              <li>Java 21</li><li>Spring Boot</li><li>PostgreSQL</li><li>Testcontainers</li><li>k6</li><li>Prometheus</li>
+            </ul>
+            <div class="entry-links">
+              <a href="projects/webhook-relay.html">Read the case →</a>
+              <a href="https://github.com/fxtiion-sys/webhook-relay" target="_blank" rel="noopener">Repo ↗</a>
+            </div>
+          </div>
+        </li>
+
+      </ol>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section id="contact" class="section contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">Contact</h2>
+      <p class="hand contact-big">let's talk!</p>
+      <p class="contact-text">I'm looking for a software developer internship or co-op in Canada. Through Western's Science Internship Program, I'm available for <strong>4- to 16-month work terms starting May 2027</strong>.</p>
+      <ul class="contact-links">
+        <li><a class="btn btn-primary" href="mailto:ellie.nkim.dev@gmail.com">ellie.nkim.dev@gmail.com</a></li>
+        <li><a class="btn" href="https://github.com/fxtiion-sys" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a class="btn" href="https://www.linkedin.com/in/nhelliek" target="_blank" rel="noopener">LinkedIn</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built with plain HTML, CSS and a little JavaScript · Hosted on GitHub Pages</p>
+  </footer>
+
+  <script src="js/main.js" defer></script>
+</body>
+</html>
